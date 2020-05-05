@@ -208,15 +208,17 @@ public class RestController extends AbstractComponent implements HttpServerTrans
     /**
      * Dispatch the request, if possible, returning true if a response was sent or false otherwise.
      */
+    //todo 对于一个final变量，如果是基本数据类型的变量，则其数值一旦在初始化之后便不能更改；如果是引用类型的变量，则在对其初始化之后便不能再让其指向另一个对象。
     boolean dispatchRequest(final RestRequest request, final RestChannel channel, final NodeClient client,
                             final Optional<RestHandler> mHandler) throws Exception {
+        //拿到请求内容的长度
         final int contentLength = request.hasContent() ? request.content().length() : 0;
 
         RestChannel responseChannel = channel;
         // Indicator of whether a response was sent or not
         boolean requestHandled;
-
         if (contentLength > 0 && mHandler.map(h -> hasContentType(request, h) == false).orElse(false)) {
+            //ContentType错误时的处理
             sendContentTypeErrorMessage(request, channel);
             requestHandled = true;
         } else if (contentLength > 0 && mHandler.map(h -> h.supportsContentStream()).orElse(false) &&
@@ -236,7 +238,11 @@ public class RestController extends AbstractComponent implements HttpServerTrans
                 // iff we could reserve bytes for the request we need to send the response also over this channel
                 responseChannel = new ResourceHandlingHttpChannel(channel, circuitBreakerService, contentLength);
 
+                /**
+                 * 对处理器做一个包装
+                 */
                 final RestHandler wrappedHandler = mHandler.map(h -> handlerWrapper.apply(h)).get();
+
                 wrappedHandler.handleRequest(request, responseChannel, client);
                 requestHandled = true;
             } catch (Exception e) {
@@ -331,6 +337,17 @@ public class RestController extends AbstractComponent implements HttpServerTrans
 
         // Loop through all possible handlers, attempting to dispatch the request
         Iterator<MethodHandlers> allHandlers = getAllHandlers(request);
+        /**
+         *  while(allHandlers.hasNext()){
+         *             final Optional<RestHandler> mHandler = Optional.ofNullable(allHandlers.next()).flatMap(mh -> mh.getHandler(request.method()));
+         *             requestHandled = dispatchRequest(request, channel, client, mHandler);
+         *             if (requestHandled) {
+         *                 break;
+         *             }
+         *   }
+         *   这种写法和下面的写法有什么区别吗？
+         */
+
         for (Iterator<MethodHandlers> it = allHandlers; it.hasNext(); ) {
             final Optional<RestHandler> mHandler = Optional.ofNullable(it.next()).flatMap(mh -> mh.getHandler(request.method()));
             requestHandled = dispatchRequest(request, channel, client, mHandler);

@@ -209,6 +209,7 @@ final class Bootstrap {
             throw new BootstrapException(e);
         }
 
+        //modules plugins都是在这里加载的
         node = new Node(environment) {
             @Override
             protected void validateNodeBeforeAcceptingRequests(
@@ -258,6 +259,7 @@ final class Bootstrap {
     }
 
     private void start() throws NodeValidationException {
+        //todo 真正的启动工作委托给了node bootstrap是node的一层包装
         node.start();
         keepAliveThread.start();
     }
@@ -318,7 +320,7 @@ final class Bootstrap {
             // setDefaultUncaughtExceptionHandler
             Thread.setDefaultUncaughtExceptionHandler(
                 new ElasticsearchUncaughtExceptionHandler(() -> Node.NODE_NAME_SETTING.get(environment.settings())));
-
+            //todo  为启动工作做准备（jvm参数 配置文件 modules plugins的加载）
             INSTANCE.setup(true, environment);
 
             try {

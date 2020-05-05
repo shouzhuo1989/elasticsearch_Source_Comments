@@ -77,7 +77,7 @@ class Netty4HttpRequestHandler extends SimpleChannelInboundHandler<Object> {
                 new Netty4HttpChannel(serverTransport, httpRequest, pipelinedRequest, detailedErrorsEnabled, threadContext);
 
         if (request.decoderResult().isSuccess()) {
-            serverTransport.dispatchRequest(httpRequest, channel);
+             serverTransport.dispatchRequest(httpRequest, channel);
         } else {
             assert request.decoderResult().isFailure();
             serverTransport.dispatchBadRequest(httpRequest, channel, request.decoderResult().cause());

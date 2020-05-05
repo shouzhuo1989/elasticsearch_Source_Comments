@@ -159,13 +159,14 @@ public class PathTrie<T> {
             node.insert(path, index + 1, value);
         }
 
+        //加synchronized意味着当以当以当前TrieNode对象为共享资源的时候，该方法是线程安全的，即同一时刻，只能有一个线程通过该方法修改当前对象中的数据
         public synchronized void insertOrUpdate(String[] path, int index, T value, BiFunction<T, T, T> updater) {
             if (index >= path.length)
                 return;
 
             String token = path[index];
             String key = token;
-            if (isNamedWildcard(token)) {
+            if (isNamedWildcard(token)) { //存在{}
                 key = wildcard;
             }
             TrieNode node = children.get(key);
@@ -194,6 +195,7 @@ public class PathTrie<T> {
         }
 
         private boolean isNamedWildcard(String key) {
+            //存在{}
             return key.indexOf('{') != -1 && key.indexOf('}') != -1;
         }
 

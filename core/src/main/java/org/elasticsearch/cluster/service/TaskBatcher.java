@@ -53,6 +53,12 @@ public abstract class TaskBatcher {
         this.threadExecutor = threadExecutor;
     }
 
+    /**
+     * 主要对传进来的tasks做了一些处理
+     * @param tasks
+     * @param timeout
+     * @throws EsRejectedExecutionException
+     */
     public void submitTasks(List<? extends BatchedTask> tasks, @Nullable TimeValue timeout) throws EsRejectedExecutionException {
         if (tasks.isEmpty()) {
             return;
@@ -68,8 +74,7 @@ public abstract class TaskBatcher {
             IdentityHashMap::new));
 
         synchronized (tasksPerBatchingKey) {
-            LinkedHashSet<BatchedTask> existingTasks = tasksPerBatchingKey.computeIfAbsent(firstTask.batchingKey,
-                k -> new LinkedHashSet<>(tasks.size()));
+            LinkedHashSet<BatchedTask> existingTasks = tasksPerBatchingKey.computeIfAbsent(firstTask.batchingKey,k -> new LinkedHashSet<>(tasks.size()));
             for (BatchedTask existing : existingTasks) {
                 // check that there won't be two tasks with the same identity for the same batching key
                 BatchedTask duplicateTask = tasksIdentity.get(existing.getTask());
@@ -185,6 +190,7 @@ public abstract class TaskBatcher {
 
         @Override
         public void run() {
+
             runIfNotProcessed(this);
         }
 

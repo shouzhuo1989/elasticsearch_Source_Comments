@@ -89,6 +89,7 @@ class Elasticsearch extends EnvironmentAwareCommand {
     }
 
     static int main(final String[] args, final Elasticsearch elasticsearch, final Terminal terminal) throws Exception {
+        //实例对象的main方法
         return elasticsearch.main(args, terminal);
     }
 
